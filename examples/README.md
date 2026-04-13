@@ -1,68 +1,62 @@
 # ClickHouse ORM Examples
 
-This directory contains 30+ examples demonstrating how to use `wclickhouse` with Pydantic v2.
+This directory contains **51+ production-ready examples** demonstrating how to use `wclickhouse` with Pydantic v2 across various analytical scenarios.
 
 ## Categories
 
-### 01_crud
-Basic Create, Read, Update, and Delete operations using ClickHouse mutations.
-- `01_insert.py`: Single record insertion.
-- `02_get_all.py`: Fetching all records from a table.
-- `03_get_first.py`: Fetching only the first record.
-- `04_get_by_field.py`: Filtering results by field value.
-- `05_update.py`: Asynchronous update mutations.
-- `06_delete.py`: Asynchronous delete mutations.
+### 01_crud (7 examples)
+Basic Create, Read, Update, and Delete operations using ClickHouse mutations and engines.
+- `01_insert.py` to `06_delete.py`: Standard CRUD operations.
+- `07_replacing_merge_tree_upsert.py`: Professional Upsert pattern using `ReplacingMergeTree` and `FINAL`.
 
-### 02_bulk
-High-performance ingestion methods essential for ClickHouse.
+### 02_bulk (3 examples)
+High-performance ingestion methods essential for Big Data.
 - `01_insert_many.py`: Fast bulk insertion of Pydantic models.
-- `02_insert_dataframe.py`: Native integration with Pandas DataFrames.
-- `03_performance.py`: Comparing row-by-row vs bulk insertion speed.
+- `02_insert_dataframe.py`: Native integration with Pandas DataFrames (Ultra-fast).
+- `03_performance.py`: Real benchmark comparing Row-by-Row vs Bulk methods.
 
-### 03_async
-Full asynchronous support for modern Python applications.
-- `01_async_insert.py`: Non-blocking insertion.
-- `02_async_get_all.py`: Non-blocking retrieval.
-- `03_get_first.py`: Async first record retrieval.
-- `04_get_by_field.py`: Async filtering.
-- `05_update.py`: Async update mutations.
-- `06_delete.py`: Async delete mutations.
+### 03_async (6 examples)
+Full non-blocking support for modern Python applications (FastAPI, Starlette).
+- Complete async CRUD and connectivity examples.
 
-### 04_types
-Mapping ClickHouse specific types to Pydantic models.
-- `01_array.py`: Using Python `List[T]` for ClickHouse `Array(T)`.
-- `02_nullable.py`: Handling `Optional[T]` as `Nullable(T)`.
-- `03_datetime64.py`: High-precision timestamps with `DateTime64`.
+### 04_types (7 examples)
+Advanced mapping between Python/Pydantic and ClickHouse analytical types.
+- `Array`, `Nullable`, `DateTime64`, `Enum`, `Decimal`, `LowCardinality`, and `Map`.
 
-### 05_query_builder
+### 05_query_builder (7 examples)
 Fluent interface for building complex SQL queries.
-- `01_simple_select.py`: Basic field selection and limits.
-- `02_complex_where.py`: Chaining multiple WHERE conditions.
-- `03_group_by_having.py`: Analytical queries with GROUP BY and HAVING.
+- Joins (INNER/LEFT), Union All, Subqueries, and complex filters.
 
-### 06_analytical
-Advanced analytical patterns using ClickHouse power.
-- `01_aggregations.py`: Sum, Avg, and Count operations.
-- `02_top_k.py`: Finding top items in a dataset.
-- `03_timeseries.py`: Time-series aggregation by intervals.
+### 06_analytical (6 examples)
+Master ClickHouse's power for data analysis.
+- Aggregations, Top-K, Time-series, Window Functions, and Moving Averages.
 
-### 07_schema
-Automatic management of database structure.
-- `01_auto_creation.py`: Table creation from Pydantic models.
-- `02_sync_columns.py`: Adding new fields automatically during runtime.
+### 07_schema (2 examples)
+Automatic management of database structure and auto-migrations.
 
-### 08_health
-Monitoring and connectivity tools.
-- `01_ping.py`: Checking database reachability.
-- `02_connectivity.py`: Handling connection errors and retries.
+### 08_health (2 examples)
+Connectivity checks and health monitoring with `.ping()`.
 
-### 09_engines
-Leveraging different storage engines.
-- `01_memory_engine.py`: Using the fast in-memory engine for transient data.
+### 09_engines (1 example)
+Using the fast in-memory engine for transient analytical data.
 
-### 10_advanced
-Expert features for production workloads.
-- `01_final_modifier.py`: Using the `FINAL` modifier for ReplacingMergeTree engines.
+### 10_advanced (1 example)
+Expert features like the `FINAL` modifier for collapsing engines.
+
+### 11_error_handling (3 examples)
+Robust patterns for catching validation errors, retries, and timeout handling.
+
+### 12_frameworks (1 example)
+FastAPI integration using asynchronous dependency patterns.
+
+### 13_advanced_engines (2 examples)
+Leveraging `AggregatingMergeTree` and `SummingMergeTree` for automatic background aggregation.
+
+### 14_logging (2 examples)
+Integration with `loguru` and performance tracing decorators.
+
+### 15_integrations (1 example)
+Efficient conversion from large raw Dict lists to Pydantic models for ingestion.
 
 ## Running the Examples
 
@@ -71,7 +65,12 @@ Expert features for production workloads.
    docker-compose up -d
    ```
 
-2. Run any example:
+2. Run all examples to verify:
    ```bash
-   python examples/01_crud/01_insert.py
+   python run_all_examples.py
+   ```
+
+3. Run a specific example:
+   ```bash
+   python examples/06_analytical/05_moving_average.py
    ```
