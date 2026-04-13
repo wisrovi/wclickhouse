@@ -19,5 +19,4 @@ We follow [Semantic Versioning 2.0.0](https://semver.org/).
 ## Current Status
 | Version | Status | Released | End of Support |
 |---------|--------|----------|----------------|
-| **0.1.x** | Pre-release | 2026-04-13 | N/A |
-| **1.0.0** | **LTS Candidate** | Planned | 2028-04-13 |
+| **1.0.0** | **LTS** | 2026-04-13 | 2028-04-13 |
