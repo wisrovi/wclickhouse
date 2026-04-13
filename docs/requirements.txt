@@ -1,0 +1,9 @@
+sphinx>=7.0.0
+furo
+myst-parser
+sphinx-copybutton
+clickhouse-connect
+pydantic>=2.0.0
+pandas
+httpx
+loguru
