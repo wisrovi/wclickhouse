@@ -4,18 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>wclickhouse 1.0.0-LTS - Enterprise ClickHouse ORM</title>
-    <meta name="description" content="wclickhouse 1.0.0-LTS is an enterprise-grade Python ORM for ClickHouse with Pydantic v2 integration, ultra-fast bulk inserts, and 95% test coverage.">
-    <meta name="keywords" content="python, clickhouse, ORM, pydantic, OLAP, big data, analytics, high-performance">
+    <meta name="description" content="wclickhouse 1.0.0-LTS is an enterprise-grade Python ORM for ClickHouse with Pydantic v2 integration, 300k+ r/s bulk inserts, and 95% test coverage.">
+    <meta name="keywords" content="python, clickhouse, ORM, pydantic, OLAP, big data, analytics, high-performance, async">
     <meta name="author" content="William Steve Rodriguez Villamizar">
     <meta name="robots" content="index, follow">
     
     <!-- Open Graph -->
     <meta property="og:title" content="wclickhouse - Python ClickHouse ORM">
-    <meta property="og:description" content="High-performance ORM for ClickHouse with Pydantic v2, automatic schema sync, and optimized bulk operations.">
+    <meta property="og:description" content="High-performance ORM for ClickHouse with Pydantic v2, automatic schema sync, and optimized analytical operations.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://github.com/wisrovi/wclickhouse">
     <meta property="og:image" content="https://img.shields.io/github/stars/wisrovi/wclickhouse?style=social">
     <meta property="og:site_name" content="wclickhouse">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@wisrovi">
+    <meta name="twitter:title" content="wclickhouse - Python ClickHouse ORM">
+    <meta name="twitter:description" content="Master Big Data analytics with Pydantic v2 validation and native ClickHouse performance.">
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%230ea5e9'/><stop offset='100%25' style='stop-color:%232563eb'/></linearGradient></defs><rect width='100' height='100' rx='20' fill='url(%23g)'/><path d='M25 75 L25 40 M45 75 L45 25 M65 75 L65 50 M85 75 L85 30' stroke='white' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
@@ -50,16 +56,19 @@
             --gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #2563eb 50%, #1d4ed8 100%);
             --gradient-hero: radial-gradient(ellipse at top, #0c4a6e 0%, #030712 50%);
             --gradient-glow: radial-gradient(circle at center, rgba(14, 165, 233, 0.15) 0%, transparent 70%);
+            --gradient-card: linear-gradient(180deg, rgba(14, 165, 233, 0.1) 0%, transparent 100%);
             
             /* Shadows */
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
             --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --shadow-glow: 0 0 40px rgba(14, 165, 233, 0.3);
             
             /* Transitions */
             --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
             --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
             
             /* Spacing */
             --section-padding: clamp(4rem, 10vw, 8rem);
@@ -87,6 +96,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* Utility Classes */
         .container {
             max-width: var(--container-max);
             margin: 0 auto;
@@ -109,6 +119,11 @@
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(55, 65, 81, 0.5);
             transition: all var(--transition-normal);
+        }
+
+        .nav.scrolled {
+            background: rgba(3, 7, 18, 0.95);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
         }
 
         .nav-container {
@@ -154,9 +169,20 @@
             font-weight: 500;
             font-size: 0.9375rem;
             transition: color var(--transition-fast);
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px; left: 0;
+            width: 0; height: 2px;
+            background: var(--gradient-primary);
+            transition: width var(--transition-normal);
         }
 
         .nav-link:hover { color: var(--text-primary); }
+        .nav-link:hover::after { width: 100%; }
 
         .nav-cta {
             display: inline-flex;
@@ -168,6 +194,7 @@
             text-decoration: none;
             font-weight: 600;
             border-radius: 8px;
+            transition: all var(--transition-normal);
             box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
         }
 
@@ -179,10 +206,34 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 8rem 1rem 4rem;
+            padding: 8rem clamp(1rem, 5vw, 2rem) 4rem;
             background: var(--gradient-hero);
             position: relative;
             overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--gradient-glow);
+            pointer-events: none;
+        }
+
+        .hero-grid {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(rgba(14, 165, 233, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(14, 165, 233, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
         }
 
         .hero-badge {
@@ -196,20 +247,25 @@
             font-size: 0.875rem;
             color: var(--primary-light);
             margin-bottom: 2rem;
+            animation: fadeInUp 0.6s ease-out;
         }
 
         .hero-title {
             font-size: clamp(2.5rem, 8vw, 4.5rem);
             font-weight: 900;
+            letter-spacing: -0.02em;
             margin-bottom: 1.5rem;
             line-height: 1.1;
+            animation: fadeInUp 0.6s ease-out 0.1s both;
         }
 
         .hero-subtitle {
             font-size: clamp(1.125rem, 3vw, 1.375rem);
             color: var(--text-secondary);
-            max-width: 800px;
+            max-width: 700px;
             margin: 0 auto 2.5rem;
+            line-height: 1.8;
+            animation: fadeInUp 0.6s ease-out 0.2s both;
         }
 
         .hero-actions {
@@ -218,6 +274,7 @@
             justify-content: center;
             flex-wrap: wrap;
             margin-bottom: 3rem;
+            animation: fadeInUp 0.6s ease-out 0.3s both;
         }
 
         .btn {
@@ -229,6 +286,8 @@
             font-weight: 600;
             text-decoration: none;
             transition: all var(--transition-normal);
+            border: none;
+            cursor: pointer;
         }
 
         .btn-primary {
@@ -252,200 +311,250 @@
             font-size: 0.9375rem;
             color: #e6edf3;
             text-align: left;
-            max-width: 700px;
+            max-width: 650px;
             margin: 0 auto;
+            backdrop-filter: blur(10px);
             box-shadow: var(--shadow-xl);
+            animation: fadeInUp 0.6s ease-out 0.5s both;
         }
 
+        .hero-code .comment { color: #8b949e; }
         .hero-code .keyword { color: #ff7b72; }
         .hero-code .function { color: #d2a8ff; }
         .hero-code .string { color: #a5d6ff; }
-        .hero-code .comment { color: #8b949e; }
 
         /* Sections */
         .section { padding: var(--section-padding) 0; }
         .section-header { text-align: center; margin-bottom: 4rem; }
-        .section-label { color: var(--primary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 1rem; display: block; }
-        .section-title { font-size: 3rem; font-weight: 800; margin-bottom: 1rem; }
+        .section-label { 
+            display: inline-block;
+            color: var(--primary); font-weight: 600; font-size: 0.875rem; 
+            text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 1rem;
+            padding: 0.5rem 1rem; background: rgba(14, 165, 233, 0.1); border-radius: 100px;
+        }
+        .section-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 1rem; }
 
-        /* Features Grid */
+        /* What Section (Flow) */
+        .what-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .pipeline-flow { display: flex; flex-direction: column; gap: 0.5rem; }
+        .pipeline-step {
+            display: flex; align-items: center; gap: 1.25rem;
+            padding: 1.25rem 1.5rem; background: var(--bg-secondary);
+            border-radius: 12px; border: 1px solid var(--border);
+            transition: all var(--transition-normal);
+        }
+        .pipeline-step:hover { border-color: var(--primary); transform: translateX(12px); box-shadow: 0 0 30px rgba(14, 165, 233, 0.15); }
+        .pipeline-step-icon {
+            width: 48px; height: 48px; background: var(--gradient-primary);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.25rem; font-weight: 700; color: white;
+        }
+
+        /* Feature Cards */
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 1.5rem;
         }
-
         .feature-card {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            transition: transform var(--transition-normal);
+            background: var(--bg-tertiary); border: 1px solid var(--border);
+            border-radius: 16px; padding: 2rem; transition: all var(--transition-normal);
+            position: relative; overflow: hidden;
         }
-
-        .feature-card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        .feature-icon { font-size: 2rem; margin-bottom: 1rem; }
+        .feature-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: var(--shadow-xl); }
+        .feature-icon { font-size: 2rem; margin-bottom: 1.5rem; }
 
         /* Stats */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-            text-align: center;
-            background: var(--bg-secondary);
-            padding: 4rem 0;
-            border-top: 1px solid var(--border);
+        .stats-section { background: var(--bg-secondary); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 2rem; text-align: center; }
+        .stat-value { font-size: 3.5rem; font-weight: 800; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* Author Card */
+        .author-card {
+            max-width: 900px; margin: 0 auto; background: var(--bg-tertiary);
+            border: 1px solid var(--border); border-radius: 24px; padding: 3rem;
+            display: grid; grid-template-columns: auto 1fr; gap: 3rem; align-items: center;
+        }
+        .author-avatar {
+            width: 160px; height: 160px; border-radius: 50%; background: var(--gradient-primary);
+            display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white;
         }
 
-        .stat-value { font-size: 3.5rem; font-weight: 800; color: var(--primary-light); }
-        .stat-label { color: var(--text-secondary); font-weight: 500; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Footer */
-        footer {
-            background: var(--bg-secondary);
-            border-top: 1px solid var(--border);
-            padding: 3rem 0;
-            text-align: center;
+        @media (max-width: 1024px) {
+            .what-grid { grid-template-columns: 1fr; }
+            .author-card { grid-template-columns: 1fr; text-align: center; }
+            .author-avatar { margin: 0 auto; }
         }
-
-        .footer-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1.5rem; }
-        .footer-link { color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; }
-        .footer-link:hover { color: var(--text-primary); }
-
         @media (max-width: 768px) {
-            .hero-title { font-size: 2.5rem; }
             .nav-links { display: none; }
+            .hero-title { font-size: 2.5rem; }
         }
     </style>
 </head>
 <body>
-    <nav class="nav">
+    <nav class="nav" id="nav">
         <div class="nav-container">
             <a href="#" class="nav-logo">
                 <div class="nav-logo-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
                 </div>
                 wclickhouse
             </a>
             <div class="nav-links">
+                <a href="#what-is" class="nav-link">What is wclickhouse?</a>
                 <a href="#features" class="nav-link">Features</a>
-                <a href="#performance" class="nav-link">Performance</a>
                 <a href="#examples" class="nav-link">Examples</a>
-                <a href="https://github.com/wisrovi/wclickhouse" class="nav-cta">GitHub</a>
+                <a href="#installation" class="nav-link">Installation</a>
+                <a href="https://wclickhouse.readthedocs.io/" class="nav-cta" target="_blank">Documentation</a>
             </div>
         </div>
     </nav>
 
     <section class="hero">
-        <div class="hero-badge">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            v1.0.0-LTS — Enterprise OLAP ORM: Pydantic v2 & 300k+ r/s
-        </div>
-        
-        <h1 class="hero-title">
-            <span class="gradient-text">Python ClickHouse ORM</span><br>
-            for Analytical Workloads
-        </h1>
-        
-        <p class="hero-subtitle">
-            <strong>wclickhouse</strong> is a high-performance library for Big Data analytics. 
-            Validated with <strong>Pydantic v2</strong>, ultra-fast <strong>Bulk Inserts</strong>, and full <strong>Async</strong> support.
-        </p>
+        <div class="hero-grid"></div>
+        <div class="hero-content">
+            <div class="hero-badge">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                v1.0.0-LTS — Enterprise OLAP ORM: Pydantic v2 & 300k+ r/s
+            </div>
+            
+            <h1 class="hero-title">
+                <span class="gradient-text">ClickHouse ORM</span><br>
+                for Python Analytics
+            </h1>
+            
+            <p class="hero-subtitle">
+                <strong>wclickhouse</strong> is an enterprise-grade library for high-performance Big Data. 
+                Validated with <strong>Pydantic v2</strong>, ultra-fast <strong>Bulk Inserts</strong>, and native <strong>Async</strong>.
+            </p>
 
-        <div class="hero-actions">
-            <a href="https://github.com/wisrovi/wclickhouse" class="btn btn-primary">
-                View on GitHub
-            </a>
-            <a href="#examples" class="btn btn-secondary">
-                View Examples
-            </a>
-        </div>
+            <div class="hero-actions">
+                <a href="https://github.com/wisrovi/wclickhouse" class="btn btn-primary" target="_blank">View on GitHub</a>
+                <a href="https://wclickhouse.readthedocs.io/" class="btn btn-secondary" target="_blank">Read the Docs</a>
+            </div>
 
-        <div class="hero-code">
-            <span class="comment"># High-performance analytical ORM</span><br>
-            <span class="keyword">from</span> pydantic <span class="keyword">import</span> BaseModel<br>
-            <span class="keyword">from</span> wclickhouse <span class="keyword">import</span> <span class="function">WClickHouse</span><br><br>
-            <span class="keyword">class</span> <span class="function">Event</span>(BaseModel):<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;user_id: <span class="keyword">int</span><br>
-            &nbsp;&nbsp;&nbsp;&nbsp;action: <span class="keyword">str</span><br><br>
-            db = <span class="function">WClickHouse</span>(Event, db_config)<br>
-            db.<span class="function">insert_many</span>([Event(user_id=1, action=<span class="string">"click"</span>)])
+            <div class="hero-code">
+                <span class="comment"># Define your analytical model</span><br>
+                <span class="keyword">class</span> <span class="function">Metric</span>(BaseModel):<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;id: <span class="keyword">int</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;value: <span class="keyword">float</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;tags: <span class="keyword">list</span>[<span class="keyword">str</span>]<br><br>
+                <span class="comment"># Massive bulk ingestion</span><br>
+                db = <span class="function">WClickHouse</span>(Metric, db_config)<br>
+                db.<span class="method">insert_many</span>(large_batch)
+            </div>
         </div>
     </section>
 
-    <section id="features" class="section">
+    <section id="what-is" class="section">
         <div class="container">
             <div class="section-header">
-                <span class="section-label">Enterprise Grade</span>
-                <h2 class="section-title">Why <span class="gradient-text">wclickhouse</span>?</h2>
+                <span class="section-label">Introduction</span>
+                <h2 class="section-title">What is <span class="gradient-text">wclickhouse</span>?</h2>
+                <p class="section-description">A lightweight yet powerful ORM specifically optimized for ClickHouse's columnar architecture.</p>
             </div>
+
+            <div class="what-grid">
+                <div class="what-content">
+                    <h3>Analytical Power <span class="gradient-text">Made Simple</span></h3>
+                    <p>wclickhouse bridges the gap between Python's type safety and ClickHouse's raw analytical speed.</p>
+                    <ul style="list-style: none;">
+                        <li style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <svg fill="none" stroke="#10b981" viewBox="0 0 24 24" width="24"><path d="M5 13l4 4L19 7" stroke-width="2"/></svg>
+                            <span><strong>Pydantic v2</strong> — Automatic validation of complex analytical types.</span>
+                        </li>
+                        <li style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <svg fill="none" stroke="#10b981" viewBox="0 0 24 24" width="24"><path d="M5 13l4 4L19 7" stroke-width="2"/></svg>
+                            <span><strong>OLAP Optimized</strong> — Native support for Bulk Inserts and DataFrames.</span>
+                        </li>
+                        <li style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <svg fill="none" stroke="#10b981" viewBox="0 0 24 24" width="24"><path d="M5 13l4 4L19 7" stroke-width="2"/></svg>
+                            <span><strong>Auto-Sync</strong> — Zero-effort schema migrations and table creation.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="pipeline-flow" style="background: var(--bg-tertiary); padding: 2rem; border-radius: 20px; border: 1px solid var(--border);">
+                    <div class="pipeline-step">
+                        <div class="pipeline-step-icon">1</div>
+                        <div><h4>Model Definition</h4><p>Pydantic classes as schema</p></div>
+                    </div>
+                    <div style="text-align: center; color: var(--text-muted);">↓</div>
+                    <div class="pipeline-step">
+                        <div class="pipeline-step-icon">2</div>
+                        <div><h4>Auto-Migration</h4><p>Tables sync automatically</p></div>
+                    </div>
+                    <div style="text-align: center; color: var(--text-muted);">↓</div>
+                    <div class="pipeline-step">
+                        <div class="pipeline-step-icon">3</div>
+                        <div><h4>Bulk Ingestion</h4><p>300k+ records per second</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="section" style="background: var(--bg-secondary);">
+        <div class="container">
+            <div class="section-header"><h2 class="section-title">Powerful <span class="gradient-text">Features</span></h2></div>
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">🚀</div>
                     <h3>Massive Ingestion</h3>
-                    <p>Optimized for OLAP. Reach 300,000+ records per second using native bulk inserts and DataFrame integration.</p>
+                    <p>Optimized for OLAP. Reach 300,000+ r/s using native bulk inserts and DataFrame integration.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🛡️</div>
-                    <h3>Pydantic v2</h3>
-                    <p>Schema-first development. Automatic validation of complex types like Arrays, Nullables, and DateTime64.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔄</div>
-                    <h3>Auto-Sync Schema</h3>
-                    <p>Zero-effort migrations. Tables are created and columns added automatically as your Pydantic models evolve.</p>
+                    <h3>Type Safety</h3>
+                    <p>Schema-first development. Validation of Arrays, Nullables, and high-precision DateTime64.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">⚡</div>
                     <h3>Dual API</h3>
-                    <p>Full support for both Synchronous and Asynchronous operations for modern Python applications.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>Query Builder</h3>
-                    <p>Fluent interface for complex analytical queries including JOINs, GROUP BY, and the FINAL modifier.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📦</div>
-                    <h3>LTS Reliability</h3>
-                    <p>95% code coverage and strict SemVer versioning. Ready for mission-critical enterprise environments.</p>
+                    <p>Full support for both Synchronous and Asynchronous operations for modern applications.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="performance" class="stats-grid">
+    <section class="section stats-section">
         <div class="container">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 3rem;">
-                <div>
-                    <div class="stat-value">300K+</div>
-                    <div class="stat-label">Records/sec (DF)</div>
-                </div>
-                <div>
-                    <div class="stat-value">95%</div>
-                    <div class="stat-label">Code Coverage</div>
-                </div>
-                <div>
-                    <div class="stat-value">30+</div>
-                    <div class="stat-label">Production Examples</div>
-                </div>
-                <div>
-                    <div class="stat-value">Async</div>
-                    <div class="stat-label">Native Support</div>
+            <div class="stats-grid">
+                <div class="stat-item"><div class="stat-value">300K+</div><div class="stat-label">Records/sec</div></div>
+                <div class="stat-item"><div class="stat-value">95%</div><div class="stat-label">Test Coverage</div></div>
+                <div class="stat-item"><div class="stat-value">30+</div><div class="stat-label">Production Examples</div></div>
+                <div class="stat-item"><div class="stat-value">LTS</div><div class="stat-label">Enterprise Ready</div></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section author-section">
+        <div class="container">
+            <div class="author-card">
+                <div class="author-avatar">WS</div>
+                <div class="author-info">
+                    <h3>William Steve Rodriguez Villamizar</h3>
+                    <p style="color: var(--primary-light);">AI Leader & Solutions Architect</p>
+                    <p>Creator of high-performance Python libraries for Enterprise Data Engineering.</p>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <a href="https://github.com/wisrovi" style="color: white; text-decoration: none;">GitHub</a>
+                        <a href="https://linkedin.com/in/wisrovi-rodriguez" style="color: white; text-decoration: none;">LinkedIn</a>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer>
-        <div class="footer-links">
-            <a href="https://github.com/wisrovi/wclickhouse" class="footer-link">GitHub</a>
-            <a href="#" class="footer-link">Documentation</a>
-            <a href="#" class="footer-link">PyPI</a>
-        </div>
-        <p style="color: var(--text-muted); font-size: 0.875rem;">
-            MIT License © 2026 William Steve Rodriguez Villamizar — Enterprise Analytical Solutions
-        </p>
+    <footer style="background: var(--bg-secondary); padding: 3rem 0; text-align: center; border-top: 1px solid var(--border);">
+        <p>MIT License © 2026 William Steve Rodriguez Villamizar</p>
     </footer>
 </body>
 </html>
