@@ -11,6 +11,12 @@ from wclickhouse.core.sync import TableSync
 
 logger = logging.getLogger(__name__)
 
+try:
+    import pyarrow as pa
+    HAS_ARROW = True
+except ImportError:
+    HAS_ARROW = False
+
 
 class WClickHouse:
     """ClickHouse repository using Pydantic models.
@@ -100,6 +106,18 @@ class WClickHouse:
         client.insert_df(self.table_name, df)
         logger.debug("Inserted DataFrame into %s", self.table_name)
 
+    def insert_arrow(self, table: Any):
+        """Insert data from an Apache Arrow Table.
+
+        Args:
+            table: pyarrow.Table instance.
+        """
+        if not HAS_ARROW:
+            raise ImportError("pyarrow is required for insert_arrow")
+        client = get_client(self.db_config)
+        client.insert_arrow(self.table_name, table)
+        logger.debug("Inserted Arrow Table into %s", self.table_name)
+
     def get_all(self) -> List[BaseModel]:
         """Retrieve all records."""
         client = get_client(self.db_config)
@@ -159,6 +177,13 @@ class WClickHouse:
             for row in result.result_rows
         ]
 
+    def query_arrow(self, sql: str, parameters: Optional[Dict] = None) -> Any:
+        """Execute a custom query and return an Apache Arrow Table."""
+        if not HAS_ARROW:
+            raise ImportError("pyarrow is required for query_arrow")
+        client = get_client(self.db_config)
+        return client.query_arrow(sql, parameters=parameters)
+
     def query_stream(self, sql: str, parameters: Optional[Dict] = None):
         """Execute a custom query and yield model instances one by one.
         
@@ -208,6 +233,10 @@ class WClickHouse:
         """Asynchronously insert from DataFrame."""
         await asyncio.to_thread(self.insert_dataframe, df)
 
+    async def insert_arrow_async(self, table: Any):
+        """Asynchronously insert from Arrow Table."""
+        await asyncio.to_thread(self.insert_arrow, table)
+
     async def get_all_async(self) -> List[BaseModel]:
         """Asynchronously retrieve all records."""
         return await asyncio.to_thread(self.get_all)
@@ -231,6 +260,10 @@ class WClickHouse:
     async def query_async(self, sql: str, parameters: Optional[Dict] = None) -> List[BaseModel]:
         """Asynchronously execute custom query."""
         return await asyncio.to_thread(self.query, sql, parameters)
+
+    async def query_arrow_async(self, sql: str, parameters: Optional[Dict] = None) -> Any:
+        """Asynchronously execute custom query returning Arrow Table."""
+        return await asyncio.to_thread(self.query_arrow, sql, parameters)
 
     async def count_async(self) -> int:
         """Asynchronously count records."""
