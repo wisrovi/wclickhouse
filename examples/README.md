@@ -14,6 +14,7 @@ High-performance ingestion methods essential for Big Data.
 - `01_insert_many.py`: Fast bulk insertion of Pydantic models.
 - `02_insert_dataframe.py`: Native integration with Pandas DataFrames (Ultra-fast).
 - `03_performance.py`: Real benchmark comparing Row-by-Row vs Bulk methods.
+- `04_buffer_manager.py`: Optimized batching of small individual inserts.
 
 ### 03_async (6 examples)
 Full non-blocking support for modern Python applications (FastAPI, Starlette).
@@ -27,9 +28,9 @@ Advanced mapping between Python/Pydantic and ClickHouse analytical types.
 Fluent interface for building complex SQL queries.
 - Joins (INNER/LEFT), Union All, Subqueries, and complex filters.
 
-### 06_analytical (6 examples)
+### 06_analytical (7 examples)
 Master ClickHouse's power for data analysis.
-- Aggregations, Top-K, Time-series, Window Functions, and Moving Averages.
+- Aggregations, Top-K, Time-series, Window Functions, Moving Averages, and **Query Streaming**.
 
 ### 07_schema (2 examples)
 Automatic management of database structure and auto-migrations.
