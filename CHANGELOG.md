@@ -1,43 +1,28 @@
-# WPipe Changelog
+# Changelog - wclickhouse
 
-All notable changes to WPipe will be documented in this file.
+All notable changes to this project will be documented in this file.
 
----
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.5.1] - 2026-04-10
+## [1.0.0] - 2026-04-13
+### Added
+- **LTS Release**: First stable long-term support version.
+- **Apache Arrow Integration**: Native support for binary columnar ingestion via `insert_arrow()` and `query_arrow()`.
+- **Buffer Manager**: Automatic batching of small insertions to maximize server throughput.
+- **Query Streaming**: Memory-efficient lazy loading of records via `query_stream()`.
+- **Pydantic v2 Core**: Full integration for schema definition and automatic validation.
+- **Enhanced Type Mapping**: Support for `Enum`, `Decimal`, `Map`, `Array`, and `LowCardinality` types.
+- **Health Checks**: Added `.ping()` and `.ping_async()` methods.
+- **Dual API**: Complete synchronous and asynchronous support.
+- **Documentation**: New premium landing page and 54+ production-ready examples.
+- **Test Infrastructure**: Reorganized `docker/` and `test/` (Unit + Integration) directories.
+
+### Changed
+- Reorganized project structure from boilerplate esqueleto to enterprise-grade ORM.
+- Updated default ports to `8124` (HTTP) and `9001` (TCP) to avoid local conflicts.
 
 ### Fixed
-- Alert system API compatibility with new `expression` parameter
-- Performance comparison example using `get_stats()` instead of deprecated method
-- Reduced package size (42MB → 140KB) by excluding heavy examples
-
----
-
-## [1.5.0] - 2026-04-10
-
-### Added
-- **ParallelExecutor**: Execute pipeline steps in parallel (ThreadPoolExecutor/ProcessPoolExecutor)
-- **ExecutionMode**: IO_BOUND, CPU_BOUND, SEQUENTIAL
-- **DAGScheduler**: Dependency graph management with topological sorting
-- **PipelineAsStep**: Use pipelines as steps in other pipelines
-- **@step()** decorator: Inline step definition
-- **StepRegistry**: Central registry for decorated steps
-- **ResourceMonitor**: Track RAM/CPU during execution
-- **Exporter**: JSON/CSV export capabilities
-- **Type validators**: Input/output validation
-
----
-
-## [1.0.0] - 2024-04-01
-
-### Added
-- **Pipeline**: Core pipeline orchestration
-- **Condition**: Conditional branching based on data
-- **Retry**: Automatic retry with backoff
-- **APIClient**: External API integration
-- **SQLite/Wsqlite**: Data persistence
-- **Error handling**: Custom exceptions with codes
-- **YAML config**: Load configurations from YAML
-- **Nested pipelines**: Compose complex workflows
-- **Progress tracking**: Rich terminal output
-- **Type hints**: Complete type annotations
+- Authentication issues with default ClickHouse user.
+- ILLEGAL_FINAL errors by correctly setting up `ReplacingMergeTree` engines in examples.
+- Pydantic validation errors during complex analytical aggregations.
